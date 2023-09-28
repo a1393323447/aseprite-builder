@@ -41,8 +41,8 @@ jobs:
       - uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
-          artifacts: "*.zip"
           body: Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}
+          allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build-aseprite:
