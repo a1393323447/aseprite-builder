@@ -42,7 +42,7 @@ jobs:
         with:
           tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
           body: Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}
-          allowUpdates: true
+          skipIfReleaseExists: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build-aseprite:
