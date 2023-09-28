@@ -1,8 +1,6 @@
 name: Build and release Aseprite
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
   push:
     branches:
       - main
