@@ -1,0 +1,123 @@
+name: Build and release Aseprite
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - 'BuildLog.md'
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  fetch-aseprite-info:
+    name: Fetch deps info
+    runs-on: ubuntu-latest
+    outputs:
+      download-link: ${{ steps.aseprite-link.outputs.download-link }}
+      release-tag: ${{ steps.aseprite-link.outputs.release-tag }}
+    steps:
+      - name: Fetch Aseprite release link
+        id: aseprite-link
+        uses: a1393323447/fetch-release@main
+        with:
+            group: aseprite
+            repo: aseprite
+            match: Aseprite-.*?-Source.zip
+
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: fetch-aseprite-info
+    permissions:
+      contents: write
+    outputs:
+      download-link: ${{ needs.fetch-aseprite-info.outputs.download-link }}
+      release-tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
+          artifacts: "*.zip"
+          body: Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-aseprite:
+    name: Build Aseprite
+    needs: create-release
+    permissions:
+      contents: write
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+          os: [ windows-latest, ubuntu-latest, macOS-latest ]
+        fail-fast: false
+    steps:
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install -y g++ cmake ninja-build libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev libfontconfig1-dev
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macOS-latest'
+        run: brew install ninja p7zip
+      - name: Fetch Skia release link
+        id: skia-link
+        uses: a1393323447/fetch-release@main
+        with:
+            group: aseprite
+            repo: skia
+            match: Skia-${{ runner.os }}-Release-x64(-libstdc\+\+)?.zip
+      - name: Download Skia
+        run: |
+          curl -o Skia-${{ runner.os }}-Release-x64.zip -L ${{ steps.skia-link.outputs.download-link }}
+          unzip Skia-${{ runner.os }}-Release-x64.zip -d skia
+      - name: Download Aseprite release
+        run: |
+          curl -o Aseprite-source.zip -L ${{ needs.create-release.outputs.download-link }}
+          unzip Aseprite-source.zip -d aseprite
+          mkdir -p aseprite/build
+      - name: Set architecture for the produced binary (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Setting Visual Studio build environment variables and paths (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: seanmiddleditch/gha-setup-vsdevenv@master
+      - name: Run CMake (Windows)
+        if: matrix.os == 'windows-latest'
+        working-directory: aseprite/build
+        shell: cmd
+        run: cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_IGNORE_PATH='C:/ProgramData/chocolatey/bin/;C:/Strawberry/c/bin/' -DLAF_BACKEND=skia -DSKIA_DIR=../../skia -DSKIA_LIBRARY_DIR=../../skia/out/Release-x64 -G Ninja ..
+      - name: Run CMake (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        working-directory: aseprite/build
+        run: cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DLAF_BACKEND=skia -DSKIA_DIR=../../skia -DSKIA_LIBRARY_DIR=../../skia/out/Release-x64 -G Ninja ..
+      - name: Run CMake (macOS)
+        if: matrix.os == 'macOS-latest'
+        working-directory: aseprite/build
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_OSX_ARCHITECTURES=x86_64 -DLAF_BACKEND=skia -DSKIA_DIR=../../skia -DSKIA_LIBRARY_DIR=../../skia/out/Release-x64 -G Ninja ..
+      - name: Run Ninja
+        working-directory: aseprite/build
+        run: ninja aseprite
+      - name: Clean up build
+        working-directory: aseprite/build/bin
+        shell: bash
+        run: rm -f gen modp_b64_gen gen.exe gen.exe.manifest modp_b64_gen.exe modp_b64_gen.exe.manifest
+      - name: (Windows) Make portable zip
+        working-directory: aseprite/build/bin
+        run: echo '# This file is here so Aseprite behaves as a portable program' > aseprite.ini
+      - name: Create release
+        working-directory: aseprite/build/bin
+        run: 7z -tzip a Aseprite-${{ needs.create-release.outputs.release-tag }}-${{ runner.os }}.zip *
+      - name: Upload release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: aseprite/build/bin/Aseprite-${{ needs.create-release.outputs.release-tag }}-${{ runner.os }}.zip
+          asset_name: Aseprite-${{ needs.create-release.outputs.release-tag }}-${{ runner.os }}.zip
+          tag: ${{ needs.create-release.outputs.release-tag }}
