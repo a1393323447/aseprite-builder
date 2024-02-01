@@ -27,7 +27,7 @@ jobs:
 
   create-release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: fetch-aseprite-info
     permissions:
       contents: write
