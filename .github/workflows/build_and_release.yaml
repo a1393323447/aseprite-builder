@@ -1,4 +1,4 @@
-name: Build and release Aseprite 
+name: Build and release Aseprite
 
 on:
   push:
@@ -12,7 +12,7 @@ env:
 jobs:
   fetch-aseprite-info:
     name: Fetch deps info
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       download-link: ${{ steps.aseprite-link.outputs.download-link }}
       release-tag: ${{ steps.aseprite-link.outputs.release-tag }}
