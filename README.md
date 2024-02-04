@@ -21,4 +21,4 @@ Build Aseprite using Github action
   ```
 - update `BuildLog.md` and push
 - now you should see the building process via `Actions` and you can find the product in `Release`
-- accroding to (Eula)[https://github.com/aseprite/aseprite/blob/main/EULA.txt] , we need to remove the product in `Release`
+- accroding to [Eula](https://github.com/aseprite/aseprite/blob/main/EULA.txt) , we need to remove the product in `Release`
