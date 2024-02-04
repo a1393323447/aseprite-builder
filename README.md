@@ -25,6 +25,7 @@ Build Aseprite using Github action
 accroding to [Eula](https://github.com/aseprite/aseprite/blob/main/EULA.txt) :
 
 > (b) Distribution.
+> 
 > You may not distribute copies of the SOFTWARE PRODUCT to third parties. Evaluation versions available for download from the Licensor's websites may be freely distributed.
 
 we need to remove the product in `Releases` .
