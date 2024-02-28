@@ -1,7 +1,7 @@
 # aseprite-builder
 Build Aseprite using Github action
 
-# what should I do?
+# What should you do?
 - fork this repo
 - choose the platform you want to build
   ```yaml
@@ -19,7 +19,7 @@ Build Aseprite using Github action
         matrix:
           os: [ windows-latest, ubuntu-latest, macOS-latest ] # <------- remove platform(s) you don't want
   ```
-- update `BuildLog.md` and push
+- **update `BuildLog.md` and push** (This step triggers the building process. You definitely want to do this!)
 - now you should see the building process via `Actions` and you can find the product in `Release`
 
 accroding to [Eula](https://github.com/aseprite/aseprite/blob/main/EULA.txt) :
