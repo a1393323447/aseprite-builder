@@ -1,4 +1,4 @@
-# aseprite-builder
+# aseprite-builder 1
 Build Aseprite using Github action
 
 # What should you do?
