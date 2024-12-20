@@ -68,6 +68,7 @@ jobs:
         run: |
           git clone --recurse-submodules -j8 https://github.com/aseprite/aseprite
       - name: Install Skia
+        working-directory: aseprite
         shell: bash
         run: |
           if [[ "${{ runner.os }}" == "Windows" ]] ; then
@@ -90,7 +91,7 @@ jobs:
         run: |
           export enable_ccache=off
           export laf_backend=skia
-          export enable_scripting=on
+          export enable_scripting=off
 
           if [[ "${{ runner.os }}" == "macOS" ]] ; then
             export skia_arch=arm64
@@ -106,7 +107,7 @@ jobs:
             -DENABLE_CCACHE=$enable_ccache \
             -DLAF_BACKEND=$laf_backend \
             -DSKIA_DIR=skia \
-            -DSKIA_LIBRARY_DIR=../skia/out/Release-$skia_arch
+            -DSKIA_LIBRARY_DIR=skia/out/Release-$skia_arch
       - name: Compiling
         shell: bash
         working-directory: aseprite
