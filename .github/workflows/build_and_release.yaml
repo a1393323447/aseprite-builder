@@ -65,11 +65,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Aseprite
         shell: bash
-        env:
-          RELEASE_TAG: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
         run: |
-          echo "Tag is $RELEASE_TAG"
-          git clone --recurse-submodules -j8 -branch "$RELEASE_TAG" https://github.com/aseprite/aseprite
+          git clone --recurse-submodules -j8 https://github.com/aseprite/aseprite
       - name: Install Skia
         shell: bash
         run: |
