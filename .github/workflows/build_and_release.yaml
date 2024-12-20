@@ -68,7 +68,8 @@ jobs:
         env:
           RELEASE_TAG: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
         run: |
-          git clone --recurse-submodules -j8 -branch $RELEASE_TAG https://github.com/aseprite/aseprite
+          echo "Tag is $RELEASE_TAG"
+          git clone --recurse-submodules -j8 -branch "$RELEASE_TAG" https://github.com/aseprite/aseprite
       - name: Install Skia
         shell: bash
         run: |
