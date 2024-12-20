@@ -62,6 +62,11 @@ jobs:
           sudo apt-get install -y \
             libpixman-1-dev libfreetype6-dev libharfbuzz-dev zlib1g-dev \
             libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev
+      - name: Download Aseprite release
+        run: |
+          curl -o Aseprite-source.zip -L ${{ needs.create-release.outputs.download-link }}
+          unzip Aseprite-source.zip -d aseprite
+          mkdir -p aseprite/build
       - name: Install Skia
         shell: bash
         run: |
@@ -81,6 +86,7 @@ jobs:
         if: runner.os == 'Windows'
       - name: Generating Makefiles
         shell: bash
+        working-directory: aseprite
         run: |
           export enable_ccache=off
           export laf_backend=skia
@@ -100,7 +106,7 @@ jobs:
             -DENABLE_CCACHE=$enable_ccache \
             -DLAF_BACKEND=$laf_backend \
             -DSKIA_DIR=skia \
-            -DSKIA_LIBRARY_DIR=skia/out/Release-$skia_arch
+            -DSKIA_LIBRARY_DIR=../skia/out/Release-$skia_arch
       - name: Compiling
         shell: bash
         run: |
