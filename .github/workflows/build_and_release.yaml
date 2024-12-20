@@ -62,12 +62,11 @@ jobs:
           sudo apt-get install -y \
             libpixman-1-dev libfreetype6-dev libharfbuzz-dev zlib1g-dev \
             libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev
+      - uses: actions/checkout@v4
       - name: Install Aseprite
-        uses: actions/checkout@v4
-        with:
-          path: aseprite
-          ref: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
-          submodules: recursive
+        shell: bash
+        run: |
+          git clone --recurse-submodules -j8 -branch ${{ steps.aseprite-link.outputs.release-tag }} https://github.com/aseprite/aseprite
       - name: Install Skia
         shell: bash
         run: |
