@@ -113,7 +113,11 @@ jobs:
         working-directory: aseprite
         run: |
           cd build && ninja
-      - name: (Windows) Make portable zip
+      - name: Clean Up Build folder
+        working-directory: aseprite/build/bin
+        shell: bash
+        run: find . -mindepth 1 ! \( -name 'aseprite' -o -name 'aseprite.exe' -o -name 'data' -prune \) -exec rm -rf {} +
+      - name: Make portable zip
         working-directory: aseprite/build/bin
         run: echo '# This file is here so Aseprite behaves as a portable program' > aseprite.ini
       - name: Create release
