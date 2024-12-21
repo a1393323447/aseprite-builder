@@ -66,7 +66,7 @@ jobs:
       - name: Install Aseprite
         shell: bash
         run: |
-          git clone --recurse-submodules -j8 https://github.com/aseprite/aseprite
+          git clone --branch ${{ needs.create-release.outputs.release-tag }} --recurse-submodules -j8 https://github.com/aseprite/aseprite
       - name: Install Skia
         working-directory: aseprite
         shell: bash
