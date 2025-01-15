@@ -1,11 +1,7 @@
 name: Build and release Aseprite
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'BuildLog.md'
+  workflow_dispatch:
 env:
   BUILD_TYPE: Release
 
@@ -42,6 +38,7 @@ jobs:
           body: Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}
           skipIfReleaseExists: true
           token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: true
 
   build-aseprite:
     name: Build Aseprite
