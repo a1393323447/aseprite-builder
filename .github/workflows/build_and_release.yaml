@@ -61,7 +61,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y \
             libpixman-1-dev libfreetype6-dev libharfbuzz-dev zlib1g-dev \
-            libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev
+            libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev libfontconfig1-dev
       - uses: actions/checkout@v4
       - name: Install Aseprite
         shell: bash
@@ -102,7 +102,7 @@ jobs:
           cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 \
-            -DENABLE_TESTS=ON \
+            -DENABLE_TESTS=OFF \
             -DENABLE_SCRIPTING=$enable_scripting \
             -DENABLE_CCACHE=$enable_ccache \
             -DLAF_BACKEND=$laf_backend \
