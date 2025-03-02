@@ -92,7 +92,7 @@ jobs:
         run: |
           export enable_ccache=off
           export laf_backend=skia
-          export enable_scripting=off
+          export enable_scripting=on
 
           if [[ "${{ runner.os }}" == "macOS" ]] ; then
             export skia_arch=arm64
@@ -108,7 +108,7 @@ jobs:
             -DENABLE_CCACHE=$enable_ccache \
             -DLAF_BACKEND=$laf_backend \
             -DSKIA_DIR=skia \
-            -DSKIA_LIBRARY_DIR=skia/out/Release-$skia_arch
+            -DSKIA_LIBRARY_DIR=$(realpath skia/out/Release-$skia_arch)
       - name: Compiling
         shell: bash
         working-directory: aseprite
