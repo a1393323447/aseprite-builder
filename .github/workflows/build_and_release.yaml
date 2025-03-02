@@ -80,8 +80,8 @@ jobs:
             wget https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-macOS-Release-arm64.zip
             unzip Skia-macOS-Release-arm64.zip -d skia
           else
-            wget https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Linux-Release-x64-libstdc++.zip
-            unzip Skia-Linux-Release-x64-libstdc++.zip -d skia
+            wget https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Linux-Release-x64.zip
+            unzip Skia-Linux-Release-x64.zip -d skia
           fi
       - uses: aseprite/get-ninja@main
       - uses: ilammy/msvc-dev-cmd@v1
