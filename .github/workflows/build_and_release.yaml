@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'BuildLog.md'
+  workflow_dispatch:
 env:
   BUILD_TYPE: Release
 
@@ -66,21 +67,21 @@ jobs:
       - name: Install Aseprite
         shell: bash
         run: |
-          git clone --recurse-submodules -j8 https://github.com/aseprite/aseprite # --branch ${{ needs.fetch-aseprite-info.outputs.release-tag }}
+          git clone --recurse-submodules -j8 https://github.com/aseprite/aseprite --branch ${{ needs.create-release.outputs.release-tag }}
       - name: Install Skia
         working-directory: aseprite
         shell: bash
         run: |
           if [[ "${{ runner.os }}" == "Windows" ]] ; then
             choco install wget -y --no-progress
-            wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-Windows-Release-x64.zip
+            wget https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Windows-Release-x64.zip
             unzip Skia-Windows-Release-x64.zip -d skia
           elif [[ "${{ runner.os }}" == "macOS" ]] ; then
-            wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-macOS-Release-arm64.zip
+            wget https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-macOS-Release-arm64.zip
             unzip Skia-macOS-Release-arm64.zip -d skia
           else
-            wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-Linux-Release-x64-libstdc++.zip
-            unzip Skia-Linux-Release-x64-libstdc++.zip -d skia
+            wget https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Linux-Release-x64.zip
+            unzip Skia-Linux-Release-x64.zip -d skia
           fi
       - uses: aseprite/get-ninja@main
       - uses: ilammy/msvc-dev-cmd@v1
@@ -91,7 +92,7 @@ jobs:
         run: |
           export enable_ccache=off
           export laf_backend=skia
-          export enable_scripting=off
+          export enable_scripting=on
 
           if [[ "${{ runner.os }}" == "macOS" ]] ; then
             export skia_arch=arm64
@@ -106,8 +107,8 @@ jobs:
             -DENABLE_SCRIPTING=$enable_scripting \
             -DENABLE_CCACHE=$enable_ccache \
             -DLAF_BACKEND=$laf_backend \
-            -DSKIA_DIR=skia \
-            -DSKIA_LIBRARY_DIR=skia/out/Release-$skia_arch
+            -DSKIA_DIR=$(realpath skia) \
+            -DSKIA_LIBRARY_DIR=$(realpath skia/out/Release-$skia_arch)
       - name: Compiling
         shell: bash
         working-directory: aseprite

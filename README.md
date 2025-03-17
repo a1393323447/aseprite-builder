@@ -3,24 +3,10 @@ Build Aseprite using Github action
 
 # What should you do?
 - fork this repo
-- choose the platform you want to build
-  ```yaml
-  # file: .github/workflows/build_and_release.yaml
-  # ...
-  # lots of codes
-  # ...
-  build-aseprite:
-    name: Build Aseprite
-    needs: create-release
-    permissions:
-      contents: write
-    runs-on: ${{ matrix.os }}
-    strategy:
-        matrix:
-          os: [ windows-latest, ubuntu-latest, macOS-latest ] # <------- remove platform(s) you don't want
-  ```
 - **enable workflow `Build and release Aseprite` in `Actions -- Workflows`**
-- **update `BuildLog.md` and push** (This step triggers the building process. You definitely want to do this!)
+- click `Action > Build and release Aseprite > run workflow` as the figure shows
+  ![trigger the workflow](https://github.com/user-attachments/assets/5174f407-4daf-4e28-996e-5efb4f8751cb)
+  
 - now you should see the building process via `Actions` and you can find the product in `Release`
 
 accroding to [Eula](https://github.com/aseprite/aseprite/blob/main/EULA.txt) :
@@ -30,3 +16,11 @@ accroding to [Eula](https://github.com/aseprite/aseprite/blob/main/EULA.txt) :
 > You may not distribute copies of the SOFTWARE PRODUCT to third parties. Evaluation versions available for download from the Licensor's websites may be freely distributed.
 
 we need to remove the product in `Releases` .
+
+# FAQ
+
+## Windows: libcrypto-1_1-x64.dll not found
+1. download [openssl-1.1.1w.zip](https://download.firedaemon.com/FireDaemon-OpenSSL/openssl-1.1.1w.zip)
+2. extract `x64/bin/libcrypto-1_1-x64.dll` from `openssl-1.1.1w.zip` to the same directory as `aseprite.exe`
+3. now the aseprite should working properly
+
