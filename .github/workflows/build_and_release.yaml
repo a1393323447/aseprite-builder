@@ -108,6 +108,7 @@ jobs:
             -DENABLE_CCACHE=$enable_ccache \
             -DLAF_BACKEND=$laf_backend \
             -DSKIA_DIR=$(realpath skia) \
+            -DOPENSSL_USE_STATIC_LIBS=ON \
             -DSKIA_LIBRARY_DIR=$(realpath skia/out/Release-$skia_arch)
       - name: Compiling
         shell: bash
