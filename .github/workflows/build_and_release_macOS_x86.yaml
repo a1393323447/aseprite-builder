@@ -73,7 +73,7 @@ jobs:
         shell: bash
         run: |
           wget https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-macOS-Release-x64.zip
-          unzip Skia-macOS-Release-arm64.zip -d skia
+          unzip Skia-macOS-Release-x64.zip -d skia
       - uses: aseprite/get-ninja@main
       - name: Generating Makefiles
         shell: bash
