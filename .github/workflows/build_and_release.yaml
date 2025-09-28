@@ -1,65 +1,65 @@
-name: Build and release Aseprite
+name   名字: Build and release Aseprite名称：构建并发布Aseprite
 
-on:
-  push:
-    branches:
-      - main
-    paths:
+on   在:
+  push   推:
+    branches   分支机构:
+      - main   ——主要
+    paths   路径:
       - 'BuildLog.md'
   workflow_dispatch:
 env:
-  BUILD_TYPE: Release
+  BUILD_TYPE: Release   BUILD_TYPE:释放
 
-jobs:
+jobs   工作:
   fetch-aseprite-info:
-    name: Fetch deps info
-    runs-on: ubuntu-latest
-    outputs:
-      download-link: ${{ steps.aseprite-link.outputs.download-link }}
-      release-tag: ${{ steps.aseprite-link.outputs.release-tag }}
-    steps:
-      - name: Fetch Aseprite release link
+    name   名字: Fetch deps info   name：获取深度信息
+    runs-on   运行在: ubuntu-latest   上运行:ubuntu-latest
+    outputs   输出:
+      download-link   上述英文: $下载链接：${{steps. aseprites -link.outputs。上述}}{{ steps.aseprite-link.outputs.download-link }}
+      release-tag   版本标记: $Release-tag: ${{steps.asepri -link.outputs。版本标记}}{{ steps.aseprite-link.outputs.release-tag }}
+    steps   步骤:
+      - name   名字: Fetch Aseprite release link—name：获取Aseprite发布链接
         id: aseprite-link
-        uses: a1393323447/fetch-release@main
-        with:
-            group: aseprite
-            repo: aseprite
-            match: Aseprite-.*?-Source.zip
+        uses   使用: a1393323447/fetch-release@main用途:a1393323447 / fetch-release@main
+        with   与:
+            group   集团: aseprite   aseprite group):
+            repo   回购: aseprite   回购:aseprite
+            match   匹配: Aseprite-.*?-Source.zip匹配:Aseprite - . * ? -Source.zip
 
-  create-release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: fetch-aseprite-info
-    permissions:
-      contents: write
-    outputs:
-      download-link: ${{ needs.fetch-aseprite-info.outputs.download-link }}
-      release-tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
-          body: Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}
-          skipIfReleaseExists: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+  create-release   创建发布:
+    name   名字: Create Release   名称：创建发布
+    runs-on   运行在: ubuntu-latest   上运行:ubuntu-latest
+    needs   需要: fetch-aseprite-info需求:fetch-aseprite-info
+    permissions   权限:
+      contents   内容: write   内容:写
+    outputs   输出:
+      download-link   上述英文: $下载链接：${{needs.fetch-aseprite-info.outputs。上述}}{{ needs.fetch-aseprite-info.outputs.download-link }}
+      release-tag   版本标记: $Release-tag: ${{needs.fetch-aseprite-info.outputs。版本标记}}{{ needs.fetch-aseprite-info.outputs.release-tag }}
+    steps   步骤:
+      - uses   使用: actions/checkout@v2-使用：actions/checkout@v2
+      - uses   使用: ncipollo/release-action@v1-使用：ncipollo/release-action@v1
+        with   与:
+          tag   标签: $标签：${{needs.fetch-aseprite-info.outputs。版本标记}}{{ needs.fetch-aseprite-info.outputs.release-tag }}
+          body   身体: Aseprite-$body: Aseprite-${{needs.fetch-aseprite-info.outputs。版本标记}}{{ needs.fetch-aseprite-info.outputs.release-tag }}
+          skipIfReleaseExists: true   真正的
+          token   令牌: $Token: ${{secrets。GITHUB_TOKEN}}{{ secrets.GITHUB_TOKEN }}
 
   build-aseprite:
-    name: Build Aseprite
-    needs: create-release
-    permissions:
-      contents: write
-    runs-on: ${{ matrix.os }}
-    strategy:
-        matrix:
-          os: [ windows-latest, ubuntu-latest, macOS-latest ]
-        fail-fast: false
-    steps:
-      - name: Install Dependencies
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          sudo apt-get update -qq
+    name   名字: Build Aseprite   名称：构建Aseprite
+    needs   需要: create-release   需求:创建发布
+    permissions   权限:
+      contents   内容: write   内容:写
+    runs-on   运行在: $运行：${{矩阵。os}}{{ matrix.os }}
+    strategy   策略:
+        matrix   矩阵:
+          os   的: [ windows-latest操作系统：[windows-最新 ]
+        fail-fast   快速失败: false   假
+    steps   步骤:
+      - name   名字: Install Dependencies—name：安装依赖项
+        if   如果: runner.os ==    如果:跑步。os == ‘Linux’'Linux'   “Linux”
+        shell   壳牌: bash   bash shell:
+        run   运行: |
+          sudo apt-get update -qq   执行命令apt-get update -qq
           sudo apt-get install -y \
             libpixman-1-dev libfreetype6-dev libharfbuzz-dev zlib1g-dev \
             libx11-dev libxcursor-dev libxi-dev libxrandr-dev libgl1-mesa-dev \
