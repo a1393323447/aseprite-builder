@@ -36,7 +36,7 @@ jobs:
       download-link: ${{ needs.fetch-aseprite-info.outputs.download-link }}
       release-tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
@@ -63,11 +63,23 @@ jobs:
           sudo apt-get install -y \
             libpixman-1-dev libfreetype6-dev libharfbuzz-dev zlib1g-dev \
             libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev libfontconfig1-dev
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install Aseprite
         shell: bash
         run: |
           git clone --recurse-submodules -j8 https://github.com/aseprite/aseprite --branch ${{ needs.create-release.outputs.release-tag }}
+      - name: Inject Release Version into Source
+        working-directory: aseprite
+        shell: bash
+        run: |
+          RELEASE_TAG="${{ needs.create-release.outputs.release-tag }}"
+          VERSION_NUM="${RELEASE_TAG#v}"
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            sed -i '' "s/set(VERSION \"1.x-dev\")/set(VERSION \"${VERSION_NUM}\")/g" src/ver/CMakeLists.txt
+          else
+            sed -i "s/set(VERSION \"1.x-dev\")/set(VERSION \"${VERSION_NUM}\")/g" src/ver/CMakeLists.txt
+          fi
+          grep "set(VERSION" src/ver/CMakeLists.txt
       - name: Install Skia
         working-directory: aseprite
         shell: bash
