@@ -36,8 +36,8 @@ jobs:
       download-link: ${{ needs.fetch-aseprite-info.outputs.download-link }}
       release-tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: ncipollo/release-action@v1
+      - uses: actions/checkout@v7
+      - uses: ncipollo/release-action@v1.21.0
         with:
           tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
           body: Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}
@@ -64,7 +64,7 @@ jobs:
             libpixman-1-dev libfreetype6-dev libharfbuzz-dev zlib1g-dev \
             libx11-dev libxcursor-dev libxi-dev libxrandr-dev libgl1-mesa-dev \
             libfontconfig1-dev
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Aseprite
         shell: bash
         run: |
@@ -85,7 +85,7 @@ jobs:
             unzip Skia-Linux-Release-x64.zip -d skia
           fi
       - uses: aseprite/get-ninja@main
-      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ilammy/msvc-dev-cmd@v1.13.0
         if: runner.os == 'Windows'
       - name: Generating Makefiles
         shell: bash
