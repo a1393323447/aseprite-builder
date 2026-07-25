@@ -1,0 +1,98 @@
+name: Aseprite CI Build
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  fetch-aseprite-info:
+    name: Fetch deps info
+    runs-on: ubuntu-latest
+    outputs:
+      download-link: ${{ steps.aseprite-link.outputs.download-link }}
+      release-tag: ${{ steps.aseprite-link.outputs.release-tag }}
+    steps:
+      - name: Fetch Aseprite release link
+        id: aseprite-link
+        uses: a1393323447/fetch-release@main
+        with:
+          group: aseprite
+          repo: aseprite
+          match: Aseprite-.*?-Source.zip
+
+  build-aseprite-ci:
+    name: Build Aseprite (CI)
+    needs: fetch-aseprite-info
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Aseprite
+        shell: bash
+        run: |
+          git clone --recurse-submodules -j8 https://github.com/aseprite/aseprite --branch ${{ needs.fetch-aseprite-info.outputs.release-tag }}
+
+      - name: Install Skia (Windows)
+        working-directory: aseprite
+        shell: bash
+        run: |
+          choco install wget -y --no-progress
+          wget https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Windows-Release-x64.zip
+          unzip Skia-Windows-Release-x64.zip -d skia
+
+      - uses: aseprite/get-ninja@main
+      - uses: ilammy/msvc-dev-cmd@v1.13.0
+
+      - name: Generating Makefiles
+        shell: bash
+        working-directory: aseprite
+        run: |
+          
+          export enable_ccache=off
+          export laf_backend=skia
+          export enable_scripting=on
+          export skia_arch=x64
+
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DENABLE_TESTS=OFF \
+            -DENABLE_SCRIPTING=$enable_scripting \
+            -DENABLE_CCACHE=$enable_ccache \
+            -DLAF_BACKEND=$laf_backend \
+            -DSKIA_DIR=$(pwd)/skia \
+            -DOPENSSL_USE_STATIC_LIBS=ON \
+            -DSKIA_LIBRARY_DIR=$(pwd)/skia/out/Release-$skia_arch
+
+      - name: Compiling
+        shell: bash
+        working-directory: aseprite
+        run: |
+          cd build && ninja
+
+      - name: Clean Up Build folder
+        working-directory: aseprite/build/bin
+        shell: bash
+        run: |
+          
+          find . -mindepth 1 ! \( -name 'aseprite.exe' -o -name 'data' -prune \) -exec rm -rf {} +
+
+      - name: Make portable zip
+        working-directory: aseprite/build/bin
+        run: |
+          echo '# This file is here so Aseprite behaves as a portable program' > aseprite.ini
+
+      - name: Create CI build zip
+        working-directory: aseprite/build/bin
+        run: |
+          7z -tzip a Aseprite-CI-${{ needs.fetch-aseprite-info.outputs.release-tag }}-Windows.zip *
+
+      - name: Upload CI Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Aseprite-CI-Windows-${{ needs.fetch-aseprite-info.outputs.release-tag }}
+          path: aseprite/build/bin/Aseprite-CI-${{ needs.fetch-aseprite-info.outputs.release-tag }}-Windows.zip
+          retention-days: 7
