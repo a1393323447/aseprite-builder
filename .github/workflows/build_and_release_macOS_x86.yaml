@@ -144,9 +144,13 @@ jobs:
       - name: Make portable zip
         working-directory: aseprite/build/bin
         run: echo '# This file is here so Aseprite behaves as a portable program' > aseprite.ini
-      - name: Create ZIP archive
+      - name: Package and verify macOS archive
+        timeout-minutes: 10
         working-directory: aseprite/build/bin
-        run: 7z -tzip a Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}-${{ runner.os }}.zip *
+        shell: bash
+        env:
+          ARCHIVE_NAME: Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}-${{ runner.os }}.zip
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/package-macos.sh" "$ARCHIVE_NAME"
       - name: Upload validation artifact
         if: ${{ github.event_name == 'workflow_dispatch' && !inputs.publish }}
         uses: actions/upload-artifact@v7
