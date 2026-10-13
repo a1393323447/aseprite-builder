@@ -7,6 +7,12 @@ on:
     paths:
       - 'BuildLog.md'
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish GitHub Release (disable for build-only validation)
+        type: boolean
+        required: true
+        default: true
 env:
   BUILD_TYPE: Release
 
@@ -30,11 +36,9 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     needs: fetch-aseprite-info
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
     permissions:
       contents: write
-    outputs:
-      download-link: ${{ needs.fetch-aseprite-info.outputs.download-link }}
-      release-tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
     steps:
       - uses: actions/checkout@v7
       - uses: ncipollo/release-action@v1.21.0
@@ -46,7 +50,12 @@ jobs:
 
   build-aseprite:
     name: Build Aseprite
-    needs: create-release
+    needs: [fetch-aseprite-info, create-release]
+    if: >-
+      ${{ !cancelled() && needs.fetch-aseprite-info.result == 'success' &&
+          (needs.create-release.result == 'success' ||
+           (github.event_name == 'workflow_dispatch' && !inputs.publish &&
+            needs.create-release.result == 'skipped')) }}
     permissions:
       contents: write
     runs-on: ${{ matrix.os }}
@@ -68,7 +77,7 @@ jobs:
       - name: Install Aseprite
         shell: bash
         run: |
-          git clone --recurse-submodules -j8 https://github.com/aseprite/aseprite --branch ${{ needs.create-release.outputs.release-tag }}
+          git clone --recurse-submodules -j8 https://github.com/aseprite/aseprite --branch ${{ needs.fetch-aseprite-info.outputs.release-tag }}
       - name: Install Skia
         working-directory: aseprite
         shell: bash
@@ -149,13 +158,22 @@ jobs:
       - name: Make portable zip
         working-directory: aseprite/build/bin
         run: echo '# This file is here so Aseprite behaves as a portable program' > aseprite.ini
-      - name: Create release
+      - name: Create ZIP archive
         working-directory: aseprite/build/bin
-        run: 7z -tzip a Aseprite-${{ needs.create-release.outputs.release-tag }}-${{ runner.os }}.zip *
+        run: 7z -tzip a Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}-${{ runner.os }}.zip *
+      - name: Upload validation artifact
+        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.publish }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}-${{ runner.os }}-${{ runner.arch }}-attempt${{ github.run_attempt }}
+          path: aseprite/build/bin/Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}-${{ runner.os }}.zip
+          if-no-files-found: error
+          compression-level: 0
       - name: Upload release
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: aseprite/build/bin/Aseprite-${{ needs.create-release.outputs.release-tag }}-${{ runner.os }}.zip
-          asset_name: Aseprite-${{ needs.create-release.outputs.release-tag }}-${{ runner.os }}.zip
-          tag: ${{ needs.create-release.outputs.release-tag }}
+          file: aseprite/build/bin/Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}-${{ runner.os }}.zip
+          asset_name: Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}-${{ runner.os }}.zip
+          tag: ${{ needs.fetch-aseprite-info.outputs.release-tag }}
