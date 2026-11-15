@@ -23,9 +23,11 @@ The Linux build uses `ubuntu-24.04` explicitly. The November 2026 migration of
 `ubuntu-latest` to Ubuntu 26.04 exposed missing static OpenSSL dependencies in
 Aseprite's bundled libarchive, causing `bsdunzip` to fail at link time. This pin
 keeps the previously working baseline; it does not fix libarchive on Ubuntu 26.04.
-Before packaging, the workflow runs `aseprite --version` with an isolated user
-folder. That smoke test checks startup on the build runner, not GUI operation or
-compatibility with other Linux distributions.
+Before packaging, the workflow runs `aseprite --version` with fresh temporary
+`HOME`, `XDG_CONFIG_HOME`, and `ASEPRITE_USER_FOLDER` directories. This prevents
+legacy configuration migration and home-directory resource lookups from using
+the runner's files. That smoke test checks startup on the build runner, not GUI
+operation or compatibility with other Linux distributions.
 
 ## macOS archives
 
