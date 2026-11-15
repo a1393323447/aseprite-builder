@@ -17,6 +17,16 @@ accroding to [Eula](https://github.com/aseprite/aseprite/blob/main/EULA.txt) :
 
 we need to remove the product in `Releases` .
 
+## Linux build environment
+
+The Linux build uses `ubuntu-24.04` explicitly. The November 2026 migration of
+`ubuntu-latest` to Ubuntu 26.04 exposed missing static OpenSSL dependencies in
+Aseprite's bundled libarchive, causing `bsdunzip` to fail at link time. This pin
+keeps the previously working baseline; it does not fix libarchive on Ubuntu 26.04.
+Before packaging, the workflow runs `aseprite --version` with an isolated user
+folder. That smoke test checks startup on the build runner, not GUI operation or
+compatibility with other Linux distributions.
+
 ## macOS archives
 
 The macOS workflows create a relocatable `aseprite` launcher and ad-hoc sign
@@ -34,11 +44,11 @@ launch or compatibility with every macOS version.
 For build-only validation, run the workflow with `publish=false`. The resulting
 ZIP is saved as an Actions artifact instead of being uploaded to a Release.
 
-Portable packaging regression tests can be run with:
+Portable packaging and startup-check regression tests can be run with:
 
 ```sh
-python3 -m unittest discover -s tests -p 'test_package_macos.py'
+python3 -m unittest discover -s tests
 ```
 
-These tests use command stubs to check packaging behavior; real `codesign`,
-`ditto`, and app startup are checked by the macOS workflow itself.
+These tests use command stubs; real `codesign`, `ditto`, and app startup are
+checked by the corresponding platform's workflow steps.
