@@ -61,7 +61,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
-          os: [ windows-latest, ubuntu-latest, macOS-latest ]
+          # Ubuntu 26.04's static OpenSSL dependencies break bundled libarchive.
+          # Keep the last working Linux baseline until that integration is fixed.
+          os: [ windows-latest, ubuntu-24.04, macOS-latest ]
         fail-fast: false
     steps:
       - name: Install Dependencies
@@ -158,6 +160,12 @@ jobs:
       - name: Make portable zip
         working-directory: aseprite/build/bin
         run: echo '# This file is here so Aseprite behaves as a portable program' > aseprite.ini
+      - name: Verify Linux executable
+        if: runner.os == 'Linux'
+        timeout-minutes: 2
+        working-directory: aseprite/build/bin
+        shell: bash
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/verify-linux.sh"
       - name: Create ZIP archive
         if: runner.os != 'macOS'
         working-directory: aseprite/build/bin
